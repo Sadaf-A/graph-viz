@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const Node = ({ id, x, y, onDrag}) => {
+const Node = ({ id, x, y, onDrag, highlighted}) => {
   const [position, setPosition] = useState({ x, y });
   const [isDragging, setIsDragging] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -43,13 +43,14 @@ const Node = ({ id, x, y, onDrag}) => {
 
   return (
     <div
+      className={`node ${highlighted ? 'highlighted-node' : ''}`}
       style={{
         position: 'absolute',
         left: position.x,
         top: position.y,
         width: '35px',
         height: '35px',
-        backgroundColor: '#354E56',
+        backgroundColor: highlighted ? '#1abc9c' : '#354E56',
         borderRadius: '50%',
         display: 'flex',
         justifyContent: 'center',

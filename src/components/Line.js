@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Line = ({ sourceX, sourceY, destX, destY }) => {
+const Line = ({ sourceX, sourceY, destX, destY, highlighted }) => {
   return (
     <svg
       style={{
@@ -15,8 +15,11 @@ const Line = ({ sourceX, sourceY, destX, destY }) => {
         y1={sourceY}
         x2={destX}
         y2={destY}
-        stroke={'black'}
+        stroke={highlighted ? '#1abc9c' : '#2c3e50'}
         strokeWidth="2"
+        style={{
+            transition: 'stroke 0.1s ease', 
+        }}
       />
     </svg>
   );

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Node from './components/Node';
 import Line from './components/Line';
+import { bfs } from './algorithms/bfs';
 import './App.css';
 
 const nodeSize = 35;
@@ -16,6 +17,14 @@ function App() {
   const [nextId, setNextId] = useState('B');
   const [sourceNode, setSourceNode] = useState('');
   const [destNode, setDestNode] = useState('');
+  const [startNode, setStartNode] = useState('');
+  const [algorithm, setAlgorithm] = useState('BFS'); // State to select algorithm
+  const [bfsOrder, setBfsOrder] = useState([]);
+  const [currentBfsIndex, setCurrentBfsIndex] = useState(-1);
+  const [bfsEdges, setBfsEdges] = useState([]);
+  const [highlightedEdges, setHighlightedEdges] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
+
 
   const handleDrag = (id, newPosition) => {
     setNodes((prevNodes) =>
@@ -46,6 +55,39 @@ function App() {
     }
   };
 
+  const animateTraversal = (order, edges) => {
+    setBfsOrder(order);
+    setBfsEdges(edges);
+    setCurrentBfsIndex(0);
+    setHighlightedEdges([]); 
+  };
+
+  const startAnimation = () => {
+    if (nodes.length > 0 && startNode) {
+      const startNodeExists = nodes.some(node => node.id === startNode);
+      if (startNodeExists) {
+        if (algorithm === 'BFS') {
+          bfs(nodes, lines, startNode, animateTraversal);
+        }
+        setErrorMessage('');
+      } else {
+        setErrorMessage('Start node does not exist.');
+      }
+    } else {
+      setErrorMessage('Please specify a valid start node.');
+    }
+  };
+
+  useEffect(() => {
+    if (currentBfsIndex >= 0 && currentBfsIndex < bfsEdges.length) {
+      const timer = setTimeout(() => {
+        setHighlightedEdges((prev) => [...prev, bfsEdges[currentBfsIndex]]);
+        setCurrentBfsIndex((prevIndex) => prevIndex + 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentBfsIndex, bfsEdges]);
+
   return (
     <div className="container">
       <div className="node-container" id="node-container">
@@ -56,6 +98,7 @@ function App() {
             x={node.x}
             y={node.y}
             onDrag={handleDrag}
+            highlighted={bfsOrder.includes(node.id) && bfsOrder.indexOf(node.id) <= currentBfsIndex}
           />
         ))}
 
@@ -63,6 +106,10 @@ function App() {
           const sourceNode = nodes.find((node) => node.id === line.source);
           const destNode = nodes.find((node) => node.id === line.dest);
           if (!sourceNode || !destNode) return null;
+          const highlight = highlightedEdges.some(edge => 
+            (edge.source === line.source && edge.dest === line.dest) || 
+            (edge.source === line.dest && edge.dest === line.source)
+          );
           return (
             <Line
               key={index}
@@ -70,6 +117,7 @@ function App() {
               sourceY={sourceNode.y + halfNodeSize}
               destX={destNode.x + halfNodeSize}
               destY={destNode.y + halfNodeSize}
+              highlighted={highlight}
             />
           );
         })}
@@ -89,7 +137,19 @@ function App() {
           />
         <button onClick={addLine}>Add Line</button>
       <button onClick={addNode}>Add Node</button>
+      <input
+          type="text"
+          value={startNode}
+          onChange={(e) => setStartNode(e.target.value)}
+          placeholder="Start Node"
+          title="Enter the ID of the starting node for BFS"
+        />
+        <select value={algorithm} onChange={(e) => setAlgorithm(e.target.value)} title="Select the algorithm for traversal">
+          <option value="BFS">BFS</option>
+        </select>
+        <button onClick={startAnimation} title="Start BFS animation">Start</button>
       </div>
+      {errorMessage && <p className="error-message">{errorMessage}</p>}
     </div>
 
   );
