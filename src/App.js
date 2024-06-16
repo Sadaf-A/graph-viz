@@ -17,6 +17,14 @@ function App() {
   const [sourceNode, setSourceNode] = useState('');
   const [destNode, setDestNode] = useState('');
 
+  const handleDrag = (id, newPosition) => {
+    setNodes((prevNodes) =>
+      prevNodes.map((node) =>
+        node.id === id ? { ...node, ...newPosition } : node
+      )
+    );
+  };
+
   const addNode = () => {
     const container = document.getElementById('node-container');
     const containerRect = container.getBoundingClientRect();
@@ -47,6 +55,7 @@ function App() {
             id={node.id}
             x={node.x}
             y={node.y}
+            onDrag={handleDrag}
           />
         ))}
 
