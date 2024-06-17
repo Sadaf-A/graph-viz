@@ -8,10 +8,16 @@ const Node = ({ id, x, y, onDrag, highlighted}) => {
   useEffect(() => {
     const handleMouseMovement = (e) => {
       if (isDragging) {
+        const container = document.getElementById('node-container');
+        const containerRect = container.getBoundingClientRect();
         const newPosition = {
           x: e.clientX + offset.x,
           y: e.clientY + offset.y,
         };
+
+        newPosition.x = Math.max(0, Math.min(newPosition.x, containerRect.width - 30));
+        newPosition.y = Math.max(0, Math.min(newPosition.y, containerRect.height - 30));
+
         setPosition(newPosition);
         onDrag(id, newPosition);
       }
