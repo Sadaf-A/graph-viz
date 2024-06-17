@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Node from './components/Node';
 import Line from './components/Line';
 import { bfs } from './algorithms/bfs';
+import { dfs } from './algorithms/dfs';
 import './App.css';
 
 const nodeSize = 35;
@@ -18,10 +19,13 @@ function App() {
   const [sourceNode, setSourceNode] = useState('');
   const [destNode, setDestNode] = useState('');
   const [startNode, setStartNode] = useState('');
-  const [algorithm, setAlgorithm] = useState('BFS'); // State to select algorithm
+  const [algorithm, setAlgorithm] = useState('BFS'); 
   const [bfsOrder, setBfsOrder] = useState([]);
+  const [dfsOrder, setDfsOrder] = useState([]);
   const [currentBfsIndex, setCurrentBfsIndex] = useState(-1);
+  const [currentDfsIndex, setCurrentDfsIndex] = useState(-1);
   const [bfsEdges, setBfsEdges] = useState([]);
+  const [dfsEdges, setDfsEdges] = useState([]);
   const [highlightedEdges, setHighlightedEdges] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -56,10 +60,17 @@ function App() {
   };
 
   const animateTraversal = (order, edges) => {
-    setBfsOrder(order);
-    setBfsEdges(edges);
-    setCurrentBfsIndex(0);
-    setHighlightedEdges([]); 
+    if (algorithm === 'BFS') {
+      setBfsOrder(order);
+      setBfsEdges(edges);
+      setCurrentBfsIndex(0);
+      setHighlightedEdges([]);
+    } else if (algorithm === 'DFS') {
+      setDfsOrder(order);
+      setDfsEdges(edges);
+      setCurrentDfsIndex(0);
+      setHighlightedEdges([]);
+    } 
   };
 
   const startAnimation = () => {
@@ -68,6 +79,8 @@ function App() {
       if (startNodeExists) {
         if (algorithm === 'BFS') {
           bfs(nodes, lines, startNode, animateTraversal);
+        } else if (algorithm === 'DFS') {
+          dfs(nodes, lines, startNode, animateTraversal);
         }
         setErrorMessage('');
       } else {
@@ -79,14 +92,21 @@ function App() {
   };
 
   useEffect(() => {
-    if (currentBfsIndex >= 0 && currentBfsIndex < bfsEdges.length) {
+    if (algorithm === 'BFS' && currentBfsIndex >= 0 && currentBfsIndex < bfsEdges.length) {
       const timer = setTimeout(() => {
         setHighlightedEdges((prev) => [...prev, bfsEdges[currentBfsIndex]]);
         setCurrentBfsIndex((prevIndex) => prevIndex + 1);
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [currentBfsIndex, bfsEdges]);
+    if (algorithm === 'DFS' && currentDfsIndex >= 0 && currentDfsIndex < dfsEdges.length) {
+      const timer = setTimeout(() => {
+        setHighlightedEdges((prev) => [...prev, dfsEdges[currentDfsIndex]]);
+        setCurrentDfsIndex((prevIndex) => prevIndex + 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentBfsIndex, currentDfsIndex, bfsEdges, dfsEdges, algorithm]);
 
   return (
     <div className="container">
@@ -98,7 +118,9 @@ function App() {
             x={node.x}
             y={node.y}
             onDrag={handleDrag}
-            highlighted={bfsOrder.includes(node.id) && bfsOrder.indexOf(node.id) <= currentBfsIndex}
+            highlighted={algorithm === 'BFS' 
+              ? bfsOrder.includes(node.id) && bfsOrder.indexOf(node.id) <= currentBfsIndex 
+              : dfsOrder.includes(node.id) && dfsOrder.indexOf(node.id) <= currentDfsIndex}
           />
         ))}
 
@@ -146,6 +168,7 @@ function App() {
         />
         <select value={algorithm} onChange={(e) => setAlgorithm(e.target.value)} title="Select the algorithm for traversal">
           <option value="BFS">BFS</option>
+          <option value="DFS">DFS</option>
         </select>
         <button onClick={startAnimation} title="Start BFS animation">Start</button>
       </div>
