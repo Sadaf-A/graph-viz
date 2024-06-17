@@ -94,15 +94,15 @@ function App() {
   useEffect(() => {
     if (algorithm === 'BFS' && currentBfsIndex >= 0 && currentBfsIndex < bfsEdges.length) {
       const timer = setTimeout(() => {
-        setHighlightedEdges((prev) => [...prev, bfsEdges[currentBfsIndex]]);
         setCurrentBfsIndex((prevIndex) => prevIndex + 1);
+        setHighlightedEdges((prev) => [...prev, bfsEdges[currentBfsIndex]]);
       }, 1000);
       return () => clearTimeout(timer);
     }
     if (algorithm === 'DFS' && currentDfsIndex >= 0 && currentDfsIndex < dfsEdges.length) {
       const timer = setTimeout(() => {
-        setHighlightedEdges((prev) => [...prev, dfsEdges[currentDfsIndex]]);
         setCurrentDfsIndex((prevIndex) => prevIndex + 1);
+        setHighlightedEdges((prev) => [...prev, dfsEdges[currentDfsIndex]]);
       }, 1000);
       return () => clearTimeout(timer);
     }

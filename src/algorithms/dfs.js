@@ -15,7 +15,7 @@ export const dfs = (nodes, lines, startNodeId, animateDFS) => {
         adjList[node].forEach(neighbor => {
           if (!visited.has(neighbor)) {
             stack.push(neighbor);
-            edges.push({ from: node, to: neighbor });
+            edges.push({ source: node, dest: neighbor });
           }
         });
       }
