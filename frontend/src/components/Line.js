@@ -11,9 +11,9 @@ const Line = ({ sourceX, sourceY, destX, destY, highlighted }) => {
       }}
     >
       <line
-        x1={sourceX}
+        x1={sourceX-400}
         y1={sourceY}
-        x2={destX}
+        x2={destX-400}
         y2={destY}
         stroke={highlighted ? '#1abc9c' : '#2c3e50'}
         strokeWidth="2"

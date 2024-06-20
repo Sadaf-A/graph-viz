@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Node from './components/Node';
 import Line from './components/Line';
 import { bfs } from './algorithms/bfs';
@@ -16,18 +17,32 @@ import {
   Grid
 } from '@mui/material';
 import './App.css';
+import axios from 'axios';
 
 const nodeSize = 35;
 const halfNodeSize = nodeSize / 2;
 
-function App() {
-  const initialNodes = [
-    { id: 'A', x: 50, y: 50 },
-  ];
-
-  const [nodes, setNodes] = useState(initialNodes);
-  const [lines, setLines] = useState([]);
-  const [nextId, setNextId] = useState('B');
+function Profile() {
+    const routeLocation = useLocation();
+    const graph = routeLocation.state?.graph;
+  
+    const initialNodes = [
+      { id: 'A', x: 50, y: 50 },
+    ];
+  
+    const initialLines = [];
+  
+    const calculateNextId = (nodes) => {
+      const usedIds = new Set(nodes.map(node => node.id));
+      let nextId = 'A';
+      while (usedIds.has(nextId)) {
+        nextId = String.fromCharCode(nextId.charCodeAt(0) + 1);
+      }
+      return nextId;
+    };
+  const [nodes, setNodes] = useState(graph?.nodes || initialNodes);
+  const [lines, setLines] = useState(graph?.lines || initialLines);
+  const [nextId, setNextId] = useState(calculateNextId(nodes));
   const [sourceNode, setSourceNode] = useState('');
   const [destNode, setDestNode] = useState('');
   const [startNode, setStartNode] = useState('');
@@ -40,6 +55,7 @@ function App() {
   const [dfsEdges, setDfsEdges] = useState([]);
   const [highlightedEdges, setHighlightedEdges] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
+  const [graphName, setGraphName] = useState('');
 
   const handleDrag = (id, newPosition) => {
     setNodes((prevNodes) =>
@@ -49,17 +65,28 @@ function App() {
     );
   };
 
+  useEffect(() => {
+    if (graph) {
+      setNodes(graph.nodes);
+      setLines(graph.lines);
+    }
+  }, [graph]);
+  
+
   const addNode = () => {
     const container = document.getElementById('node-container');
     const containerRect = container.getBoundingClientRect();
 
     const newNode = {
-      id: nextId,
+      id: calculateNextId(nodes),
       x: Math.random() * (containerRect.width - nodeSize),
       y: Math.random() * (containerRect.height - nodeSize),
     };
-    setNodes((prevNodes) => [...prevNodes, newNode]);
-    setNextId((prevId) => String.fromCharCode(prevId.charCodeAt(0) + 1));
+
+    setNodes((prevNodes) => {
+      const updatedNodes = [...prevNodes, newNode];
+      return updatedNodes;
+    });
   };
 
   const addLine = () => {
@@ -82,6 +109,16 @@ function App() {
       setCurrentDfsIndex(0);
       setHighlightedEdges([]);
     } 
+  };
+
+  const saveGraph = async () => {
+    try {
+      const response = await axios.post('http://localhost:5000/saveGraph', { user:localStorage.getItem('username'), name: graphName, nodes, lines });
+      alert('Graph saved successfully', response.data);
+    } catch (error) {
+      console.error('Error saving graph:', error);
+      alert('Error saving graph');
+    }
   };
 
   const startAnimation = () => {
@@ -214,6 +251,22 @@ function App() {
             >
               Start
             </Button>
+            <TextField
+            label="Graph Name"
+            value={graphName}
+            onChange={(e) => setGraphName(e.target.value)}
+            margin="normal"
+            fullWidth
+          />
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={saveGraph}
+                fullWidth
+                style={{ marginTop: '20px' }}
+              >
+                Save Graph
+              </Button>
           </Paper>
           {errorMessage && (
             <Typography color="error" variant="body1" style={{ marginTop: '20px' }}>
@@ -226,4 +279,4 @@ function App() {
   );
 }
 
-export default App;
+export default Profile;
