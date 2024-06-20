@@ -3,6 +3,18 @@ import Node from './components/Node';
 import Line from './components/Line';
 import { bfs } from './algorithms/bfs';
 import { dfs } from './algorithms/dfs';
+import {
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Container,
+  Paper,
+  Typography,
+  Grid
+} from '@mui/material';
 import './App.css';
 
 const nodeSize = 35;
@@ -28,7 +40,6 @@ function App() {
   const [dfsEdges, setDfsEdges] = useState([]);
   const [highlightedEdges, setHighlightedEdges] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
-
 
   const handleDrag = (id, newPosition) => {
     setNodes((prevNodes) =>
@@ -109,72 +120,109 @@ function App() {
   }, [currentBfsIndex, currentDfsIndex, bfsEdges, dfsEdges, algorithm]);
 
   return (
-    <div className="container">
-      <div className="node-container" id="node-container">
-        {nodes.map((node) => (
-          <Node
-            key={node.id}
-            id={node.id}
-            x={node.x}
-            y={node.y}
-            onDrag={handleDrag}
-            highlighted={algorithm === 'BFS' 
-              ? bfsOrder.includes(node.id) && bfsOrder.indexOf(node.id) <= currentBfsIndex 
-              : dfsOrder.includes(node.id) && dfsOrder.indexOf(node.id) <= currentDfsIndex}
-          />
-        ))}
+    <Container className="container" maxWidth="xl">
+      <Grid container spacing={2} style={{ height: '90vh' }}>
+        <Grid item xs={8}>
+          <Paper className="node-container" id="node-container" elevation={3} style={{ height: '100%' }}>
+            {nodes.map((node) => (
+              <Node
+                key={node.id}
+                id={node.id}
+                x={node.x}
+                y={node.y}
+                onDrag={handleDrag}
+                highlighted={algorithm === 'BFS' 
+                  ? bfsOrder.includes(node.id) && bfsOrder.indexOf(node.id) <= currentBfsIndex 
+                  : dfsOrder.includes(node.id) && dfsOrder.indexOf(node.id) <= currentDfsIndex}
+              />
+            ))}
 
-        {lines.map((line, index) => {
-          const sourceNode = nodes.find((node) => node.id === line.source);
-          const destNode = nodes.find((node) => node.id === line.dest);
-          if (!sourceNode || !destNode) return null;
-          const highlight = highlightedEdges.some(edge => 
-            (edge.source === line.source && edge.dest === line.dest) || 
-            (edge.source === line.dest && edge.dest === line.source)
-          );
-          return (
-            <Line
-              key={index}
-              sourceX={sourceNode.x + halfNodeSize}
-              sourceY={sourceNode.y + halfNodeSize}
-              destX={destNode.x + halfNodeSize}
-              destY={destNode.y + halfNodeSize}
-              highlighted={highlight}
+            {lines.map((line, index) => {
+              const sourceNode = nodes.find((node) => node.id === line.source);
+              const destNode = nodes.find((node) => node.id === line.dest);
+              if (!sourceNode || !destNode) return null;
+              const highlight = highlightedEdges.some(edge => 
+                (edge.source === line.source && edge.dest === line.dest) || 
+                (edge.source === line.dest && edge.dest === line.source)
+              );
+              return (
+                <Line
+                  key={index}
+                  sourceX={sourceNode.x + halfNodeSize}
+                  sourceY={sourceNode.y + halfNodeSize}
+                  destX={destNode.x + halfNodeSize}
+                  destY={destNode.y + halfNodeSize}
+                  highlighted={highlight}
+                />
+              );
+            })}
+          </Paper>
+        </Grid>
+        <Grid item xs={4}>
+          <Paper className="form" elevation={3} style={{ padding: '20px', height: '100%' }}>
+            <TextField
+              label="Source Node"
+              value={sourceNode}
+              onChange={(e) => setSourceNode(e.target.value)}
+              margin="normal"
+              fullWidth
             />
-          );
-        })}
-      </div>
-      <div className="form">
-        <input
-            type="text"
-            value={sourceNode}
-            onChange={(e) => setSourceNode(e.target.value)}
-            placeholder="Source Node"
-          />
-          <input
-            type="text"
-            value={destNode}
-            onChange={(e) => setDestNode(e.target.value)}
-            placeholder="Destination Node"
-          />
-        <button onClick={addLine}>Add Line</button>
-      <button onClick={addNode}>Add Node</button>
-      <input
-          type="text"
-          value={startNode}
-          onChange={(e) => setStartNode(e.target.value)}
-          placeholder="Start Node"
-          title="Enter the ID of the starting node for BFS"
-        />
-        <select value={algorithm} onChange={(e) => setAlgorithm(e.target.value)} title="Select the algorithm for traversal">
-          <option value="BFS">BFS</option>
-          <option value="DFS">DFS</option>
-        </select>
-        <button onClick={startAnimation} title="Start BFS animation">Start</button>
-      </div>
-      {errorMessage && <p className="error-message">{errorMessage}</p>}
-    </div>
-
+            <TextField
+              label="Destination Node"
+              value={destNode}
+              onChange={(e) => setDestNode(e.target.value)}
+              margin="normal"
+              fullWidth
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={addLine}
+              style={{ marginRight: '10px' }}
+            >
+              Add Line
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={addNode}
+            >
+              Add Node
+            </Button>
+            <TextField
+              label="Start Node"
+              value={startNode}
+              onChange={(e) => setStartNode(e.target.value)}
+              margin="normal"
+              fullWidth
+            />
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Algorithm</InputLabel>
+              <Select
+                value={algorithm}
+                onChange={(e) => setAlgorithm(e.target.value)}
+              >
+                <MenuItem value="BFS">BFS</MenuItem>
+                <MenuItem value="DFS">DFS</MenuItem>
+              </Select>
+            </FormControl>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={startAnimation}
+              fullWidth
+            >
+              Start
+            </Button>
+          </Paper>
+          {errorMessage && (
+            <Typography color="error" variant="body1" style={{ marginTop: '20px' }}>
+              {errorMessage}
+            </Typography>
+          )}
+        </Grid>
+      </Grid>
+    </Container>
   );
 }
 
