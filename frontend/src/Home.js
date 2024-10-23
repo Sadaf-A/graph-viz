@@ -173,9 +173,6 @@ function Home() {
         </Grid>
         <Grid item xs={4}>
           <Paper className="form" elevation={3} style={{ padding: '20px', height: '100%' }}>
-            <Typography variant="h5" component="h2">
-              Register to save your graphs
-            </Typography>
             <TextField
               label="Source Node"
               value={sourceNode}
